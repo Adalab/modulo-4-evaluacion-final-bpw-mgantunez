@@ -75,20 +75,15 @@ app.post('/productos', async (req, res) => {
 });
 
 
-
-
-
-
-
-// Primer endpoint
-app.get('/categorias', async (req, res) => {
+// Leer/Listar todos los productos
+app.get('/productos', async (req, res) => {
     try {
 
         // Obtener conexión
         const conn = await getConnection();
 
         // Ejecutar la consulta
-        const [results] = await conn.query(`SELECT * FROM categorias;`);
+        const [results] = await conn.query(`SELECT * FROM productos;`);
 
         // Calcular la cantidad de elementos
         const numOfElements = results.length;
@@ -103,6 +98,37 @@ app.get('/categorias', async (req, res) => {
         });
     } catch (error) {
         console.error(error); // Log de error
-        res.status(500).json({ error: 'Hubo un problema al obtener las categorías.' });
+        res.status(500).json({ error: 'Hubo un problema al obtener los productos.' });
+    }
+});
+
+// Obtener una única entrada (producto) usando parámetros
+app.get('/productos/:id', async (req, res) => {
+    // Recuperar el ID del producto de los parámetros de la URL
+    const { id } = req.params;
+
+    try {
+        // Obtener conexión
+        const conn = await getConnection();
+
+        // Consultar el producto con el ID
+        const [results] = await conn.query('SELECT * FROM productos WHERE id_productos = ?', [id]);
+
+        // Cerrar la conexión
+        await conn.end();
+
+        // Si no se encuentra el producto, devolver un error 404
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Producto no encontrado.' });
+        }
+
+        // Si se encuentra el producto, devolver la respuesta con los detalles
+        res.status(200).json({
+            result: results[0] // Solo un producto (el primero), ya que id_producto es único
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Hubo un problema al obtener el producto.' });
     }
 });
