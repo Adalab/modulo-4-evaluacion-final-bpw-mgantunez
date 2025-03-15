@@ -196,3 +196,37 @@ app.put('/productos/:id', async (req, res) => {
         res.status(500).json({ error: 'Hubo un problema al actualizar el producto.' });
     }
 });
+
+// Eliminar un producto existente
+app.delete('/productos/:id', async (req, res) => {
+    const { id } = req.params; // ID del producto 
+
+    try {
+        // Establecer conexión con la base de datos
+        const conn = await getConnection();
+
+        // Consulta SQL para eliminar el producto
+        const deleteQuery = 'DELETE FROM productos WHERE id_productos = ?';
+
+        // Ejecutar la eliminación
+        const [results] = await conn.query(deleteQuery, [id]);
+
+        // Cerrar la conexión
+        await conn.end();
+
+        // Verificar si se eliminó alguna fila
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: 'Producto no encontrado.' });
+        }
+
+        // Responder con mensaje de éxito
+        res.status(200).json({
+            message: 'Producto eliminado correctamente.'
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Hubo un problema al eliminar el producto.' });
+    }
+});
+
