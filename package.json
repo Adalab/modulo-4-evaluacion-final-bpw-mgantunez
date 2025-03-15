@@ -27,6 +27,8 @@
   "homepage": "https://github.com/Adalab/modulo-4-evaluacion-final-bpw-mgantunez#readme",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.21.2"
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mysql2": "^3.13.0"
   }
 }
