@@ -132,3 +132,67 @@ app.get('/productos/:id', async (req, res) => {
         res.status(500).json({ error: 'Hubo un problema al obtener el producto.' });
     }
 });
+
+
+// Actualizar un producto existente
+app.put('/productos/:id', async (req, res) => {
+    const { id } = req.params; // ID del producto 
+    const { nombre, descripcion, precio, imagen_url, id_categorias } = req.body; // Datos para actualizar
+
+    // Validar que se haya proporcionado al menos un campo para actualizar
+    if (!nombre && !descripcion && !precio && !imagen_url && !id_categorias) {
+        return res.status(400).json({ error: 'Debe proporcionar al menos un campo para actualizar.' });
+    }
+
+    try {
+        // Establecer conexión con la base de datos
+        const conn = await getConnection();
+
+        // Consulta SQL para actualizar el producto
+        const updateQuery = `
+            UPDATE productos 
+            SET 
+                nombre = ?, 
+                descripcion = ?, 
+                precio = ?, 
+                imagen_url = ?, 
+                id_categorias = ? 
+            WHERE id_productos = ?
+        `;
+
+        // Ejecutar la actualización
+        const [results] = await conn.query(updateQuery, [
+            nombre,
+            descripcion,
+            precio,
+            imagen_url,
+            id_categorias,
+            id // Aquí paso el ID del producto
+        ]);
+
+        // Cerrar la conexión
+        await conn.end();
+
+        // Verificar si se actualizó alguna fila
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: 'Producto no encontrado.' });
+        }
+
+        // Responder con el producto actualizado
+        res.status(200).json({
+            message: 'Producto actualizado correctamente.',
+            updatedProduct: {
+                id_productos: id,
+                nombre,
+                descripcion,
+                precio,
+                imagen_url,
+                id_categorias
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Hubo un problema al actualizar el producto.' });
+    }
+});
