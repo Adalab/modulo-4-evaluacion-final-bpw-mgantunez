@@ -33,6 +33,53 @@ app.listen(port, () => {
 });
 
 
+
+
+// Insertar una entrada en la entidad principal
+
+app.post('/productos', async (req, res) => {
+
+    console.log(req.body);
+
+    // Datos para recibir en la solicitud
+    const { nombre, descripcion, precio, imagen_url, id_categorias } = req.body;
+
+    // Validar que todos los campos necesarios estén presentes
+    if (!nombre || !descripcion || !precio || !imagen_url || !id_categorias) {
+        return res.status(400).json({ error: 'Faltan datos requeridos (nombre, descripcion, precio, imagen_url, id_categorias).' });
+    }
+
+    try {
+        // Conexión a la base de datos
+        const conn = await getConnection();
+
+        // Ejecutar la consulta para insertar un nuevo producto
+        const result = await conn.query(
+            'INSERT INTO productos (nombre, descripcion, precio, imagen_url, id_categorias) VALUES (?, ?, ?, ?, ?)',
+            [nombre, descripcion, precio, imagen_url, id_categorias]
+        );
+
+        // Cerrar la conexión
+        await conn.end();
+
+        // Mensaje de éxito y ID del producto insertado
+        res.status(201).json({
+            message: 'Producto insertado correctamente.',
+            id: result.insertId
+        });
+
+    } catch (error) {
+        console.error(error); // Error en el servidor
+        res.status(500).json({ error: 'Hubo un problema al insertar el producto.' });
+    }
+});
+
+
+
+
+
+
+
 // Primer endpoint
 app.get('/categorias', async (req, res) => {
     try {
